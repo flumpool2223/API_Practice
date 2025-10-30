@@ -5,6 +5,8 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const dbPath = path.join(__dirname, 'db', 'database.sqlite3');
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 // usersテーブルの全件取得API
 app.get('/api/v1/users', (req, res) => {
   const db = new sqlite3.Database(dbPath);
