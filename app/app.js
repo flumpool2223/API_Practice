@@ -30,13 +30,37 @@ app.get('/api/v1/users/:id', (req, res) => {
   db.close();
 });
 
-// キーワード検索APIぎt
+// キーワード検索API
 app.get('/api/v1/search', (req, res) => {
   const db = new sqlite3.Database(dbPath);
   const keyword = req.query.q;
   db.all(`SELECT * FROM users WHERE name LIKE "%${keyword}%"`, (err, rows) => {
     res.json(rows);
   });
+  db.close();
+});
+
+// ユーザ作成API
+app.post('/api/v1/users', async(req, res) => {
+  const db = new sqlite3.Database(dbPath);
+  const name = req.body.name;
+  const profile = req.body.profile;
+  const date_of_birth = req.body.date_of_birth;
+
+  const run = async (sql) => {
+    return new Promise((resolve, reject) => {
+      db.run(sql, (err) => {
+        if (err) {
+          res.status(500).send(err);
+          return reject();
+        } else {
+          res.json({message: "新規ユーザの作成成功しました" });
+          resolve();
+        }
+      });
+    });
+  };
+  await run(`INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${date_of_birth}")`);
   db.close();
 });
 
