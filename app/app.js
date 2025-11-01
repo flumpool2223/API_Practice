@@ -40,6 +40,20 @@ app.get('/api/v1/search', (req, res) => {
   db.close();
 });
 
+  const run = async (sql, db, res, message) => {
+    return new Promise((resolve, reject) => {
+      db.run(sql, (err) => {
+        if (err) {
+          res.status(500).send(err);
+          return reject();
+        } else {
+          res.json({message: message});
+          resolve();
+        }
+      });
+    });
+  };
+
 // ユーザ作成API
 app.post('/api/v1/users', async(req, res) => {
   const db = new sqlite3.Database(dbPath);
@@ -47,21 +61,31 @@ app.post('/api/v1/users', async(req, res) => {
   const profile = req.body.profile;
   const date_of_birth = req.body.date_of_birth;
 
-  const run = async (sql) => {
-    return new Promise((resolve, reject) => {
-      db.run(sql, (err) => {
-        if (err) {
-          res.status(500).send(err);
-          return reject();
-        } else {
-          res.json({message: "新規ユーザの作成成功しました" });
-          resolve();
-        }
-      });
-    });
-  };
-  await run(`INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${date_of_birth}")`);
+  await run(`INSERT INTO users (name, profile, date_of_birth) VALUES ("${name}", "${profile}", "${date_of_birth}")`, db, res, "新規ユーザを作成しました");
   db.close();
+});
+
+// ユーザ更新API
+app.put('/api/v1/users/:id', async(req, res) => {
+  const db = new sqlite3.Database(dbPath);
+  const id = req.params.id;
+
+  // 現在のユーザ情報を取得
+  db.get(`SELECT * FROM users WHERE id = ${id}`, async(err, row) => {
+    if (err) {
+      res.status(500).send(err);
+      return;
+    }
+    if (!row) {
+      res.status(404).json({ message: "ユーザが見つかりません" });
+      return;
+    }
+    const name = req.body.name ? req.body.name : row.name;
+    const profile = req.body.profile ? req.body.profile : row.profile;
+    const date_of_birth = req.body.date_of_birth ? req.body.date_of_birth : row.date_of_birth;
+    await run(`UPDATE users SET name="${name}", profile="${profile}", date_of_birth="${date_of_birth}" WHERE id=${id}`, db, res, "ユーザ情報を更新しました");
+    db.close();
+  });
 });
 
 app.listen(port, () => {
