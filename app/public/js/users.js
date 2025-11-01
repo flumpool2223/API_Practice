@@ -20,7 +20,8 @@ const usersModule = (() => {
           <td>${user.created_at}</td>
           <td>${user.updated_at}</td>
           <td>${user.date_of_birth}</td>
-        </tr>`
+          <td><a href="edit.html?uid=${user.id}">編集</a></td>
+        </tr>`;
         document.querySelector('#users-list').insertAdjacentHTML('beforeend', body);
       }
     },
@@ -43,6 +44,46 @@ const usersModule = (() => {
     const resJson = await res.json();
     alert(resJson.message);
     window.location.href = '/';
-   }
+   },
+   setExistingValue: async(uid) => {
+      const res = await fetch(BASE_URL + "/" + uid);
+      const resJson = await res.json();
+      document.querySelector('#name').value = resJson.name;
+      document.querySelector('#profile').value = resJson.profile;
+      document.querySelector('#date_of_birth').value = resJson.date_of_birth;
+   },
+      saveUser: async(uid) => {
+      const name = document.querySelector('#name').value;
+      const profile = document.querySelector('#profile').value;
+      const date_of_birth = document.querySelector('#date_of_birth').value;
+
+      // リクエストのbody
+      const body = {
+        name: name,
+        profile: profile,
+        date_of_birth: date_of_birth
+      };
+      const res = await fetch(BASE_URL + "/" + uid, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+    });
+    const resJson = await res.json();
+    alert(resJson.message);
+    window.location.href = '/';
+   },
+    deleteUser: async(uid) => {
+      const ret = window.confirm("このユーザを削除しますか？");
+      if (!ret) {
+        return false;
+      }
+      const res = await fetch(BASE_URL + "/" + uid, {
+        method: 'DELETE',
+        headers: headers
+      });
+      const resJson = await res.json();
+      alert(resJson.message);
+      window.location.href = '/';
+    }
   }
 })();
