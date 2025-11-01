@@ -88,6 +88,15 @@ app.put('/api/v1/users/:id', async(req, res) => {
   });
 });
 
+// ユーザ削除API
+app.delete('/api/v1/users/:id', async(req, res) => {
+  const db = new sqlite3.Database(dbPath);
+  const id = req.params.id;
+
+  await run(`DELETE FROM users WHERE id=${id}`, db, res, "ユーザを削除しました");
+  db.close();
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
