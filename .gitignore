@@ -1,0 +1,9 @@
+# Local files
+.DS_Store
+*.log
+app/db/database.sqlite3
+
+# Modules
+node_modules/
+package.json
+package-lock.json
